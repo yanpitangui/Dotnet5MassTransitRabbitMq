@@ -1,6 +1,7 @@
 ﻿namespace Shared
 {
-    public class GenerateThing
+    public interface GenerateThing
     {
+        public int Value {get; set;}
     }
 }

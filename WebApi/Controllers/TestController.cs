@@ -33,9 +33,7 @@ namespace WebApi.Controllers
         [HttpGet("producer-consumer")]
         public async Task<ActionResult> ProducerConsumer(int quantity = 5)
         {
-            var thingsToGenerate = Enumerable.Range(1, quantity).Select(x => new GenerateThing());
-
-            await _publishEndpoint.PublishBatch(thingsToGenerate);
+            await _publishEndpoint.Publish<GenerateThing>(new { Value = quantity });
             return Ok();
         }
     }

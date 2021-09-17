@@ -38,7 +38,7 @@ namespace WebApi
         {
             consumerConfigurator.Options<BatchOptions>(options => options
                 .SetMessageLimit(5000)
-                .SetTimeLimit(1000)
+                .SetTimeLimit(2000)
                 .SetConcurrencyLimit(24));
         }
     }

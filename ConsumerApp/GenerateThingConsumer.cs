@@ -14,7 +14,7 @@ using System.Threading.Tasks;
 
 namespace ConsumerApp
 {
-    internal class GenerateThingConsumer : IConsumer<Batch<GenerateThing>>
+    internal class GenerateThingConsumer : IConsumer<GenerateThing>
     {
         private readonly ILogger<GenerateThingConsumer> _logger;
         private readonly IPublishEndpoint _publishEndpoint;
@@ -25,7 +25,7 @@ namespace ConsumerApp
             _publishEndpoint = publishEndpoint;
         }
 
-        public async Task Consume(ConsumeContext<Batch<GenerateThing>> context)
+        public async Task Consume(ConsumeContext<GenerateThing> context)
         {
             var stopWatch = new Stopwatch();
 
@@ -35,36 +35,19 @@ namespace ConsumerApp
                 .RuleFor(e => e.Value, (f, u) => f.Name.FirstName());
             var thingsGenerated = new ConcurrentBag<ThingGenerated>();
 
-            Parallel.ForEach(Partitioner.Create(0, context.Message.Length, 500), range =>
+            Parallel.ForEach(Partitioner.Create(0, context.Message.Value, 1000), range =>
             {
 
                 var tempGenerated = thingFactory.GenerateLazy(range.Item2 - range.Item1);
                 tempGenerated.AsParallel().ForAll(t => thingsGenerated.Add(t));
             });
 
-            await _publishEndpoint.PublishBatch(thingsGenerated);
+            _publishEndpoint.PublishBatch(thingsGenerated).ConfigureAwait(false);
 
             stopWatch.Stop();
 
-            _logger.LogInformation($"Time took to generate {context.Message.Length} things: {stopWatch.ElapsedMilliseconds} ms");
+            _logger.LogInformation($"Time took to generate {context.Message.Value} things: {stopWatch.ElapsedMilliseconds} ms");
 
-        }
-    }
-
-
-    internal class GenerateThingConsumerDefinition : ConsumerDefinition<GenerateThingConsumer>
-    {
-        public GenerateThingConsumerDefinition()
-        {
-        }
-
-        protected override void ConfigureConsumer(IReceiveEndpointConfigurator endpointConfigurator,
-            IConsumerConfigurator<GenerateThingConsumer> consumerConfigurator)
-        {
-            consumerConfigurator.Options<BatchOptions>(options => options
-                .SetMessageLimit(2000)
-                .SetTimeLimit(1000)
-                .SetConcurrencyLimit(24));
         }
     }
 }

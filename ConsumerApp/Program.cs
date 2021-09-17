@@ -31,7 +31,7 @@ namespace ConsumerApp
                     {
                         x.AddConsumer<GetRandomNumberConsumer>();
 
-                        x.AddConsumer<GenerateThingConsumer>(typeof(GenerateThingConsumerDefinition));
+                        x.AddConsumer<GenerateThingConsumer>();
 
                         x.SetKebabCaseEndpointNameFormatter();
 
