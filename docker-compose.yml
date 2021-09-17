@@ -1,0 +1,27 @@
+version: '3.4'
+
+services:
+  webapi:
+    image: ${DOCKER_REGISTRY-}webapi
+    build:
+      context: .
+      dockerfile: WebApi/Dockerfile
+
+  consumerapp:
+    image: ${DOCKER_REGISTRY-}consumerapp
+    build:
+      context: .
+      dockerfile: ConsumerApp/Dockerfile
+    restart: on-failure
+
+
+  rabbitmq:
+    image: "masstransit/rabbitmq"
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    volumes:
+      - 'rabbitmq_data:/data'
+
+volumes:
+  rabbitmq_data:
