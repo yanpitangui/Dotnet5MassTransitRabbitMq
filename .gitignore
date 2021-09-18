@@ -357,3 +357,4 @@ test.db
 
 https/
 /global.json
+ConsumerApp/wait-for.sh

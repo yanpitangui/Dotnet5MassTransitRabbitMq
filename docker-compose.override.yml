@@ -4,9 +4,19 @@ services:
   webapi:
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
-      - ASPNETCORE_URLS=https://+:443;http://+:80
+      - ASPNETCORE_URLS=https://+:5001;http://+:5000
+      - RABBITMQ_HOST=rabbitmq
+      - ASPNETCORE_Kestrel__Certificates__Default__Password=yourpassword
+      - ASPNETCORE_Kestrel__Certificates__Default__Path=/https/aspnetapp.pfx
+      - ELASTIC_URI=http://elasticsearch:9200
     ports:
-      - "80"
-      - "443"
+      - "5000:5000"
+      - "5001:5001"
     volumes:
-      - ${APPDATA}/ASP.NET/Https:/root/.aspnet/https:ro
+      - ./https:/https/:ro
+
+
+  consumerapp:
+    environment:
+      - RABBITMQ_HOST=rabbitmq
+      - ELASTIC_URI=http://elasticsearch:9200

@@ -22,7 +22,7 @@ namespace WebApi.Controllers
             _publishEndpoint = publishEndpoint;
         }
 
-        [HttpGet("response")]
+        [HttpGet("request-response")]
         public async Task<ActionResult> GetAsync()
         {
             var number = await _client.GetResponse<RandomNumber>(new GetRandomNumber());

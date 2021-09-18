@@ -29,6 +29,7 @@ namespace WebApi
         public void ConfigureServices(IServiceCollection services)
         {
 
+            var rabbitMqHost = Configuration.GetValue("RABBITMQ_HOST", "localhost");
             services.AddControllers();
             services.AddSwaggerGen(c =>
             {
@@ -38,7 +39,12 @@ namespace WebApi
             services.AddMassTransit(x =>
             {
                 x.SetKebabCaseEndpointNameFormatter();
-                x.UsingRabbitMq((context, cfg) => cfg.ConfigureEndpoints(context));
+                x.UsingRabbitMq((context, cfg) =>
+                {
+                    cfg.Host(rabbitMqHost);
+                    cfg.ConfigureEndpoints(context);
+                    cfg.UseSerilogEnricher();
+                });
                 x.AddRequestClient<GetRandomNumber>();
                 x.AddConsumer<ThingGeneratedConsumer>(typeof(ThingGeneratedConsumerDefinition));
             });

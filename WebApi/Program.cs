@@ -5,6 +5,8 @@ using Newtonsoft.Json.Linq;
 using Serilog;
 using Serilog.Core;
 using Serilog.Events;
+using Serilog.Formatting.Elasticsearch;
+using Serilog.Sinks.Elasticsearch;
 using System;
 using System.Threading.Tasks;
 
@@ -44,13 +46,22 @@ namespace WebApi
         public static Logger CreateLogger()
         {
             var configuration = LoadAppConfiguration();
+            var elasticSearchUri = configuration.GetValue("ELASTIC_URI", "http://localhost:9200");
             return new LoggerConfiguration()
                 .MinimumLevel.Override("Microsoft.AspNetCore", LogEventLevel.Warning)
                 .ReadFrom.Configuration(configuration)
                 .Destructure.AsScalar<JObject>()
                 .Destructure.AsScalar<JArray>()
                 .Enrich.FromLogContext()
+                .Enrich.FromMassTransit()
                 .WriteTo.Console()
+                .WriteTo.Elasticsearch(new ElasticsearchSinkOptions(new Uri(elasticSearchUri))
+                    {
+                        AutoRegisterTemplate = true,
+                        AutoRegisterTemplateVersion = AutoRegisterTemplateVersion.ESv7,
+                        IndexFormat = "webapi-{0:yyyy.MM}",
+                        CustomFormatter = new ExceptionAsObjectJsonFormatter(renderMessage: true)
+                    })
                 .CreateLogger();
         }
 
@@ -58,8 +69,8 @@ namespace WebApi
         {
             return new ConfigurationBuilder()
                 .AddJsonFile("appsettings.json", false, true)
-                .AddJsonFile($"appsettings.{Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") ?? "Production"}.json", true)
-                .AddJsonFile("appsettings.local.json", true)
+                .AddJsonFile($"appsettings.{Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT")}", optional: true, reloadOnChange: true)
+                .AddEnvironmentVariables()
                 .Build();
         }
     }

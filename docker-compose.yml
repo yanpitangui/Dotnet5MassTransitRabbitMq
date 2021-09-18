@@ -2,26 +2,49 @@ version: '3.4'
 
 services:
   webapi:
+    entrypoint: ["./wait-for.sh", "rabbitmq:5672", "-t", "120", "--", "dotnet", "WebApi.dll"]
     image: ${DOCKER_REGISTRY-}webapi
     build:
       context: .
       dockerfile: WebApi/Dockerfile
+    volumes:
+      - ./wait-for.sh:/app/wait-for.sh
 
   consumerapp:
+    entrypoint: ["./wait-for.sh", "rabbitmq:5672", "-t", "120", "--", "dotnet", "ConsumerApp.dll"]
     image: ${DOCKER_REGISTRY-}consumerapp
     build:
       context: .
       dockerfile: ConsumerApp/Dockerfile
-    restart: on-failure
+    volumes:
+      - ./wait-for.sh:/app/wait-for.sh
 
 
   rabbitmq:
+    container_name: rabbitmq 
     image: "masstransit/rabbitmq"
     ports:
       - "5672:5672"
       - "15672:15672"
     volumes:
       - 'rabbitmq_data:/data'
+
+  elasticsearch:
+    container_name: elasticsearch 
+    image: docker.elastic.co/elasticsearch/elasticsearch:7.11.1
+    ports:
+      - "9200:9200"
+      - "9300:9300"
+    environment:
+      discovery.type: single-node
+      ES_JAVA_OPTS: "-Xms512m -Xmx512m"
+  kibana:
+    container_name: kibana
+    image: docker.elastic.co/kibana/kibana:7.11.1
+    ports:
+      - "5601:5601"
+    depends_on:
+      - elasticsearch
 
 volumes:
   rabbitmq_data:

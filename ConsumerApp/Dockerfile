@@ -3,6 +3,8 @@
 FROM mcr.microsoft.com/dotnet/runtime:5.0 AS base
 WORKDIR /app
 
+RUN apt-get -q update && apt-get -qy install netcat
+
 FROM mcr.microsoft.com/dotnet/sdk:5.0 AS build
 WORKDIR /src
 COPY ["ConsumerApp/ConsumerApp.csproj", "ConsumerApp/"]
