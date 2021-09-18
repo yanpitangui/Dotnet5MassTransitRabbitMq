@@ -1,6 +1,11 @@
 # Masstransit + Rabbitmq + ElasticSearch + Kibana
 In this project, you will see an implementation of pub/sub and request/response using MassTransit and RabbitMQ as a broker.
 
+# Requirements
+1. Docker-desktop
+2. .Net 5.0 sdk
+3. Visual studio (optional)
+
 ## How to run
 1. Run this command on the root folder: 
     ```csharp
